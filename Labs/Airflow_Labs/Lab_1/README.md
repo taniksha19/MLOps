@@ -336,3 +336,30 @@ app-airflow-webserver-1 | 127.0.0.1 - - [17/Feb/2023:09:34:29 +0000] "GET /healt
 #### Step 6: Pipeline Outputs
 
 - Once the DAG completes its execution, check any output or artifacts produced by your functions and tasks. 
+
+Of course. Here is a small README section that only details the extra changes made to the original lab.
+
+-----
+
+##Changes Made: Parallel Clustering with DBSCAN
+
+This project extends the original single-model lab by creating a more advanced, parallel pipeline to compare two different clustering algorithms: **K-Means** and **DBSCAN**.
+
+The primary changes from the original lab are:
+
+  * **Parallel Workflow**: The Airflow DAG has been refactored. After the initial `preprocess_data` step, the workflow now branches ("fans-out") to train both the K-Means and DBSCAN models simultaneously, demonstrating a more efficient experimentation setup.
+
+  * **DBSCAN Model Integration**: A second clustering model, DBSCAN, has been added. This required adding new model-building and prediction functions to the `src/lab.py` script.
+
+  * **Comparative Goal**: The objective of the lab has shifted from simply automating a single task to building an automated pipeline for model comparison, which is a core concept in MLOps.
+
+The new workflow is orchestrated by Airflow as follows:
+
+```
+                       +-----> [ Build K-Means Model ] -----> [ Predict w/ K-Means ]
+                      /
+[ Load Data ] -> [ Preprocess Data ]
+                      \
+                       +-----> [ Build DBSCAN Model ]  -----> [ Predict w/ DBSCAN ]
+```
+
