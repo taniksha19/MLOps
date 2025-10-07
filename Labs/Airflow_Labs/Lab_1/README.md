@@ -347,11 +347,11 @@ This project extends the original single-model lab by creating a more advanced, 
 
 The primary changes from the original lab are:
 
-  * **Parallel Workflow**: The Airflow DAG has been refactored. After the initial `preprocess_data` step, the workflow now branches ("fans-out") to train both the K-Means and DBSCAN models simultaneously, demonstrating a more efficient experimentation setup.
+  * **Parallel Workflow**: The Airflow DAG has been refactored. After the initial `preprocess_data` step, the workflow now branches to train both the K-Means and DBSCAN models simultaneously, demonstrating a more efficient experimentation setup.
 
   * **DBSCAN Model Integration**: A second clustering model, DBSCAN, has been added. This required adding new model-building and prediction functions to the `src/lab.py` script.
 
-  * **Comparative Goal**: The objective of the lab has shifted from simply automating a single task to building an automated pipeline for model comparison, which is a core concept in MLOps.
+  * **Comparative Goal**: The objective of the lab has shifted from simply automating a single task to building an automated pipeline for model comparison.
 
 The new workflow is orchestrated by Airflow as follows:
 
