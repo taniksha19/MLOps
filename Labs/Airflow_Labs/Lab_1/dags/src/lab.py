@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, DBSCAN
 from kneed import KneeLocator
 import pickle
 import os
@@ -98,4 +98,43 @@ def load_model_elbow(filename,sse):
     # Make predictions on the test data
     predictions = loaded_model.predict(df)
     
+    return predictions[0]
+
+def build_save_dbscan_model(data, filename):
+    """
+    Builds a DBSCAN clustering model and saves it.
+    """
+    df = pickle.loads(data)
+    
+    # Instantiate and fit the DBSCAN model. These parameters may need tuning.
+    dbscan = DBSCAN(eps=0.5, min_samples=5)
+    dbscan.fit(df)
+
+    output_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "model")
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, filename)
+
+    # Save the trained model
+    with open(output_path, 'wb') as f:
+        pickle.dump(dbscan, f)
+
+    labels = dbscan.labels_
+    n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+    print(f"DBSCAN estimated number of clusters: {n_clusters_}")
+
+def load_dbscan_and_predict(filename):
+    """
+    Loads a saved DBSCAN model and makes a prediction on test data.
+    """
+    output_path = os.path.join(os.path.dirname(__file__), "../model", filename)
+    loaded_model = pickle.load(open(output_path, 'rb'))
+
+    df_test = pd.read_csv(os.path.join(os.path.dirname(__file__), "../data/test.csv"))
+    df_test = df_test.dropna()
+    test_data = df_test[["BALANCE", "PURCHASES", "CREDIT_LIMIT"]]
+    min_max_scaler = MinMaxScaler()
+    test_data_scaled = min_max_scaler.fit_transform(test_data)
+
+    predictions = loaded_model.fit_predict(test_data_scaled)
+    print(f"DBSCAN prediction for first test record: {predictions[0]}")
     return predictions[0]

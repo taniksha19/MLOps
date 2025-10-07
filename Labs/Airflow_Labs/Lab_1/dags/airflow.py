@@ -1,8 +1,8 @@
 # Import necessary libraries and modules
 from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
-from src.lab import load_data, data_preprocessing, build_save_model,load_model_elbow
+from src.lab import load_data, data_preprocessing, build_save_model,load_model_elbow, build_save_dbscan_model, load_dbscan_and_predict
 
 from airflow import configuration as conf
 
@@ -57,10 +57,26 @@ load_model_task = PythonOperator(
     dag=dag,
 )
 
+# --- DBSCAN Branch (NEW) ---
+build_save_dbscan_model_task = PythonOperator(
+    task_id='build_save_dbscan_model',
+    python_callable=build_save_dbscan_model,
+    op_args=[data_preprocessing_task.output, "dbscan_model.sav"],
+    dag=dag,
+)
+
+load_dbscan_model_task = PythonOperator(
+    task_id='load_dbscan_and_predict',
+    python_callable= load_dbscan_and_predict,
+    op_args=["dbscan_model.sav"],
+    dag=dag,
+)
 
 
 # Set task dependencies
-load_data_task >> data_preprocessing_task >> build_save_model_task >> load_model_task
+load_data_task >> data_preprocessing_task >>[build_save_model_task, build_save_dbscan_model_task]
+build_save_model_task >> load_model_task
+build_save_dbscan_model_task >> load_dbscan_model_task
 
 # If this script is run directly, allow command-line interaction with the DAG
 if __name__ == "__main__":
