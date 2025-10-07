@@ -341,7 +341,7 @@ Of course. Here is a small README section that only details the extra changes ma
 
 -----
 
-##Changes Made: Parallel Clustering with DBSCAN
+### Changes Made: Parallel Clustering with DBSCAN
 
 This project extends the original single-model lab by creating a more advanced, parallel pipeline to compare two different clustering algorithms: **K-Means** and **DBSCAN**.
 
