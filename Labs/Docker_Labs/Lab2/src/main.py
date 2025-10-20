@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 import tensorflow as tf
 import numpy as np
+import joblib
 
 app = Flask(__name__, static_folder='statics')
 
@@ -11,6 +12,9 @@ api_url = 'http://0.0.0.0:4000/predict'  # Update with the actual URL
 model = tf.keras.models.load_model('my_model.keras')  # Replace 'my_model.keras' with the actual model file
 class_labels = ['Setosa', 'Versicolor', 'Virginica']
 
+# Load Diabetes Model
+model_diabetes = tf.keras.models.load_model('my_model_diabetes.keras')
+scaler_diabetes = joblib.load('scaler_diabetes.joblib')
 
 """Modern web apps use a technique named routing. This helps the user remember the URLs. 
 For instance, instead of having /booking.php they see /booking/. Instead of /account.asp?id=1234/ 
@@ -42,6 +46,41 @@ def predict():
             return jsonify({"error": str(e)})
     elif request.method == 'GET':
         return render_template('predict.html')
+    else:
+        return "Unsupported HTTP method"
+
+
+# --- NEW ENDPOINT FOR DIABETES REGRESSION ---
+@app.route('/predict_diabetes', methods=['GET', 'POST'])
+def predict_diabetes():
+    if request.method == 'POST':
+        try:
+            data = request.form
+            # Get all 10 features from the form
+            features = [
+                float(data['age']),
+                float(data['sex']),
+                float(data['bmi']),
+                float(data['bp']),
+                float(data['s1']),
+                float(data['s2']),
+                float(data['s3']),
+                float(data['s4']),
+                float(data['s5']),
+                float(data['s6'])
+            ]
+
+            # Perform the prediction
+            input_data = np.array(features)[np.newaxis, ]
+            input_data_scaled = scaler_diabetes.transform(input_data) # Use Diabetes scaler
+            prediction = model_diabetes.predict(input_data_scaled)[0][0] # Get single value
+            
+            return jsonify({"predicted_progression": float(prediction)})
+        except Exception as e:
+            return jsonify({"error": str(e)})
+    elif request.method == 'GET':
+        # Render the new diabetes prediction page
+        return render_template('predict_diabetes.html')
     else:
         return "Unsupported HTTP method"
 

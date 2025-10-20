@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Diabetes Predictor</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
+        h1 { color: #0056b3; }
+        form { background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        label { margin-top: 10px; display: block; color: #555; }
+        input[type="number"] { padding: 10px; margin-top: 5px; border-radius: 4px; border: 1px solid #ddd; width: calc(100% - 22px); display: block; }
+        input[type="submit"] { background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; }
+        .predicted-class { color: #31708e; background-color: #d9edf7; padding: 10px; border-radius: 4px; margin-top: 20px; }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <h1>Diabetes Progression Predictor</h1>
+    <form id="predictionForm">
+        <label for="age">Age (scaled):</label>
+        <input type="number" id="age" step="0.01" required><br>
+
+        <label for="sex">Sex (scaled):</label>
+        <input type="number" id="sex" step="0.01" required><br>
+
+        <label for="bmi">BMI:</label>
+        <input type="number" id="bmi" step="0.01" required><br>
+
+        <label for="bp">Average Blood Pressure:</label>
+        <input type="number" id="bp" step="0.01" required><br>
+
+        <label for="s1">Serum (S1):</label>
+        <input type="number" id="s1" step="0.01" required><br>
+
+        <label for="s2">Serum (S2):</label>
+        <input type="number" id="s2" step="0.01" required><br>
+
+        <label for="s3">Serum (S3):</label>
+        <input type="number" id="s3" step="0.01" required><br>
+
+        <label for="s4">Serum (S4):</label>
+        <input type="number" id="s4" step="0.01" required><br>
+
+        <label for="s5">Serum (S5):</label>
+        <input type="number" id="s5" step="0.01" required><br>
+
+        <label for="s6">Serum (S6):</label>
+        <input type="number" id="s6" step="0.01" required><br>
+
+        <input type="submit" value="Predict">
+    </form>
+
+    <div class="predicted-class" style="display:none;">
+        <h2 id="predictedValue"></h2>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#predictionForm').on('submit', function(event) {
+                event.preventDefault(); 
+
+                var formData = {
+                    'age': $('#age').val(),
+                    'sex': $('#sex').val(),
+                    'bmi': $('#bmi').val(),
+                    'bp': $('#bp').val(),
+                    's1': $('#s1').val(),
+                    's2': $('#s2').val(),
+                    's3': $('#s3').val(),
+                    's4': $('#s4').val(),
+                    's5': $('#s5').val(),
+                    's6': $('#s6').val()
+                };
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/predict_diabetes', // --- NEW URL ---
+                    data: formData,
+                    dataType: 'json',
+                    encode: true
+                }).done(function(data) {
+                    // Display the predicted number
+                    $('#predictedValue').text("Predicted Progression: " + data.predicted_progression.toFixed(2));
+                    $('.predicted-class').show();
+                }).fail(function(data) {
+                    alert('Error: Could not reach the prediction server.');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
