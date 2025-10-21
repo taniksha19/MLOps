@@ -14,6 +14,8 @@ COPY src/model2_training.py /app/
 RUN python model_training.py
 RUN python model2_training.py
 
+
+
 # Stage 2: Serve Predictions
 FROM python:3.9-slim AS serving
 
