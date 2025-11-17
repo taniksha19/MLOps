@@ -1,3 +1,68 @@
+# Lab 1 (Revised): Programmatic Data Pipeline (GCS to BigQuery)
+
+This project takes the original "Lab 1" and "Lab 2" concepts and combines them into a single, automated data pipeline.
+
+Instead of manually using the console or CLI, this project uses a Python script to perform all the steps. This is a best-practice approach for building scalable, repeatable data engineering and MLOps workflows.
+
+## Objective
+
+The script (`main.py`) executes a complete data pipeline:
+
+1.  **Connects** to Google Cloud using a secure Service Account.
+2.  **Uploads** a local data file (e.g., `dataset.csv`) to a Google Cloud Storage (GCS) staging bucket.
+3.  **Loads** the data from GCS into a BigQuery Data Warehouse.
+4.  **Verifies** the data load by running a simple SQL query.
+
+## Conceptual Changes from Original Lab
+
+This project introduces several critical changes from the original lab document, moving from a manual process to an automated, production-style setup.
+
+* **GCS as Staging Area:** GCS is used as a temporary "data lake" staging area, not the final storage destination.
+* **BigQuery as Warehouse:** We introduced BigQuery as the true, queryable data warehouse. The pipeline's goal is to get data *into* BigQuery.
+* **Programmatic > Manual:** All manual `gsutil` CLI commands and UI clicks are replaced by a single Python script (`main.py`) using the official `google-cloud-storage` and `google-cloud-bigquery` libraries.
+* **Secure & Configurable:** All sensitive configuration (`PROJECT_ID`, `BUCKET_NAME`) is moved into a `.env` file. This file (and the critical `credentials.json`) are listed in `.gitignore` to prevent them from ever being pushed to a public repository.
+* **Service Account Auth:** We use a Service Account JSON key (`credentials.json`) for authentication. This is the standard for applications and scripts, replacing the manual `gcloud auth login` method.
+
+## How to Run
+
+### 1. Google Cloud Setup (One-Time)
+
+Before running the script, you must set up the following in the Google Cloud Console:
+
+1.  **Create a GCS Bucket:** (e.g., `gcp-lab-bucket-staging-taniksha`)
+2.  **Create a BigQuery Dataset:** (e.g., `lab1_warehouse`)
+3.  **Create a Service Account:**
+    * Give it the roles: `Storage Object Admin`, `BigQuery Data Editor`, and `BigQuery Job User`.
+    * Download the JSON key and rename it `credentials.json`.
+
+### 2. Local Setup
+
+1.  **Place Files:**
+    * Move your downloaded `credentials.json` into this `lab1` folder.
+    * Make sure your `dataset.csv` is in this folder.
+
+2.  **Create `.env` file:**
+    * Create a file named `.env` in this folder.
+    * Copy and paste the following into it, replacing the values with your own:
+
+    ```
+    # --- .env file ---
+    
+    PROJECT_ID="your-gcp-project-id"
+    BUCKET_NAME="your-unique-gcs-bucket-name"
+    
+    # This tells the script to use your credentials file
+    GOOGLE_APPLICATION_DELEGATE="credentials.json"
+    ```
+
+### 3. Run the Pipeline
+
+With your virtual environment active, simply run the script:
+
+```bash
+python main.py
+```
+
 # **Lab 1: Data Storage and Warehouse using Google Cloud (GCP)**
 
 ---
