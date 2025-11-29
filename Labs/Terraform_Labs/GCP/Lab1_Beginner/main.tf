@@ -1,33 +1,48 @@
 provider "google" {
-    project = "<YOUR_PROJECT_ID>" # Replace with your project ID
-    region  = "us-central1"
-    zone    = "us-central1-a"
+  project = var.project_id
+  region  = var.region
+  zone    = var.zone
 }
 
-resource "google_compute_instance" "vm_instance" {
-    name         = "terraform-vm"
-    machine_type = "f1-micro"
-    zone         = "us-central1-a"
+# 1. FIREWALL: Explicitly allow HTTP traffic (Port 80)
+resource "google_compute_firewall" "web_firewall" {
+  name    = "allow-http-traffic"
+  network = "default"
 
-    labels = {
-        environment = "development"
-        owner = "team-terraform"
-    }
+  allow {
+    protocol = "tcp"
+    ports    = ["80"]
+  }
 
-    boot_disk {
-        initialize_params {
-            image = "debian-cloud/debian-11"
-            size = 12
-        }
-    }
-
-    network_interface {
-        network = "default"
-    }
+  source_ranges = ["0.0.0.0/0"] # Open to the world
+  target_tags   = ["http-server"]
 }
 
-resource "google_storage_bucket" "terraform-lab-bucket" {
-    name          = "terraform-lab-bucket-unique-12345"
-    location      = "us-central1"
-    force_destroy = true
+# 2. VIRTUAL MACHINE: The server itself
+resource "google_compute_instance" "web_server" {
+  name         = "terraform-nginx-vm"
+  machine_type = var.machine_type
+  zone         = var.zone
+  tags         = ["http-server"] # Connects to the firewall rule above
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    network = "default"
+    access_config {
+      # Empty block assigns a Public IP
+    }
+  }
+
+  # 3. PROVISIONING: Script to install Nginx automatically on boot
+  metadata_startup_script = <<-EOT
+    #!/bin/bash
+    apt-get update
+    apt-get install -y nginx
+    echo '<h1>Deployed via Terraform</h1>' > /var/www/html/index.html
+  EOT
 }

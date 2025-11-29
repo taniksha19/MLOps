@@ -1,3 +1,44 @@
+# Enhanced Terraform Lab: Modular Web Server Deployment
+
+## Project Overview
+This project represents a significant evolution from the standard "Hello World" Terraform lab. Instead of simply creating an empty Virtual Machine with hardcoded values, this project deploys a **fully functional Nginx Web Server** using a modular, production-ready file structure.
+
+The goal was to demonstrate true **Infrastructure as Code (IaC)** principles: Reusability, Network Security, and Automated Provisioning.
+
+## Key Conceptual Changes
+
+We implemented four major architectural shifts compared to the original lab instructions:
+
+### 1. Modular Architecture
+* **Original Lab:** All code was crammed into a single `main.tf` file with hardcoded values (e.g., `region = "us-central1"`).
+* **This Lab:** We separated concerns into three distinct files:
+    * `variables.tf`: Defines input parameters, making the code reusable across different environments (Dev/Prod) without changing the logic.
+    * `main.tf`: Contains only the resource logic.
+    * `outputs.tf`: Defines what data is returned to the user.
+
+### 2. Network Security (The Firewall)
+* **Original Lab:** Created a VM but ignored networking, making the instance effectively isolated or reliant on default insecure settings.
+* **This Lab:** We explicitly defined a **Custom Firewall Rule** (`google_compute_firewall`) to allow TCP traffic on Port 80. This demonstrates that compute resources are useless without the accompanying network security rules.
+
+### 3. Functional Provisioning (Startup Scripts)
+* **Original Lab:** Deployed an "Empty OS" (Debian) that did nothing upon boot.
+* **This Lab:** Utilized the `metadata_startup_script` attribute to inject a Bash script. This automatically updates the OS and installs the **Nginx Web Server** upon creation, transforming "Infrastructure" into a "Service."
+
+### 4. Automated Feedback Loops (Outputs)
+* **Original Lab:** Required the user to manually click through the GCP Console GUI to find the IP address.
+* **This Lab:** Leveraged `outputs.tf` to programmatically retrieve and display the public IP and clickable URL immediately after deployment.
+
+---
+
+## Project Structure
+
+```text
+├── main.tf          # Resource definitions (VM, Firewall)
+├── variables.tf     # Input variable definitions (Region, Project ID)
+├── outputs.tf       # Output definitions (Website URL, Public IP)
+├── terraform.tfvars # (Optional) Local file to store sensitive variables like Project ID
+└── README.md        # Documentation
+
 # Terraform Beginner Lab (GCP Version)
 
 ## Objective
